@@ -3,6 +3,8 @@ import { createServiceClient } from '@/lib/supabase/server'
 import { sendWhatsAppStatusUpdate, sendWhatsAppText } from '@/lib/whatsapp'
 import { BRANCHES } from '@/lib/data/branches'
 
+export const runtime = 'edge'
+
 export async function POST(request: Request) {
   try {
     const rawBody = await request.text()
@@ -58,7 +60,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ received: true, warning: 'No order identifier found' })
     }
 
-    const { data: order, error: fetchErr } = await query.single()
+    const { data: orderData, error: fetchErr } = await query.single()
+    const order = orderData as any
 
     if (fetchErr || !order) {
       console.error('[Monime Webhook] Order query failed:', fetchErr)
@@ -66,8 +69,7 @@ export async function POST(request: Request) {
     }
 
     // Update order in Supabase
-    const { error: updateErr } = await supabase
-      .from('orders')
+    const { error: updateErr } = await (supabase.from('orders') as any)
       .update({
         payment_status: 'PAID',
         status: 'CONFIRMED',

@@ -152,21 +152,22 @@ export const useStaffStore = create<StaffState>()(
 
           if (data.user) {
             // Fetch staff profile
-            const { data: profile } = await supabase
-              .from('staff_profiles')
+            const { data: profile } = await (supabase
+              .from('staff_profiles') as any)
               .select('*, branches(name, slug)')
               .eq('id', data.user.id)
               .single()
 
-            const branchData = profile?.branches as { name: string; slug: string } | undefined
+            const profileData = profile as any
+            const branchData = profileData?.branches as { name: string; slug: string } | undefined
 
             const staffUser: StaffUser = {
               id: data.user.id,
               email: data.user.email || email,
-              full_name: profile?.full_name || 'Staff Member',
-              role: (profile?.role as StaffRole) || 'CASHIER',
-              branch_id: profile?.branch_id || null,
-              branch_name: branchData?.name || (profile?.branch_id ? 'Assigned Branch' : 'All Branches'),
+              full_name: profileData?.full_name || 'Staff Member',
+              role: (profileData?.role as StaffRole) || 'CASHIER',
+              branch_id: profileData?.branch_id || null,
+              branch_name: branchData?.name || (profileData?.branch_id ? 'Assigned Branch' : 'All Branches'),
               branch_slug: branchData?.slug || null,
             }
 

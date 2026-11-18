@@ -3,6 +3,8 @@ import OrderStatusCard from '@/components/storefront/OrderStatusCard'
 import type { Order } from '@/types/database.types'
 import Link from 'next/link'
 
+export const runtime = 'edge'
+
 interface OrderPageProps {
   params: Promise<{ id: string }>
 }
@@ -54,7 +56,8 @@ export async function generateMetadata({ params }: OrderPageProps) {
   const { id } = await params
   const supabase = await createServerSupabase()
   const { data } = await supabase.from('orders').select('order_number').eq('id', id).single()
+  const order = data as { order_number?: string } | null
   return {
-    title: data ? `Order #${data.order_number} · Chicken Town SL` : 'Track Order · Chicken Town SL',
+    title: order?.order_number ? `Order #${order.order_number} · Chicken Town SL` : 'Track Order · Chicken Town SL',
   }
 }

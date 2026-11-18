@@ -3,6 +3,8 @@ import { verifyWebhookSignature } from '@/lib/whatsapp-crypto'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/database.types'
 
+export const runtime = 'edge'
+
 // Supabase client for webhook processing (service role key bypasses RLS for system tables)
 function getSupabaseServiceClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mock.supabase.co'
@@ -160,14 +162,9 @@ export async function POST(request: NextRequest) {
             const botModule = await import('@/lib/whatsapp-bot')
             if (typeof botModule.processWhatsAppMessage === 'function') {
               await botModule.processWhatsAppMessage(fromPhone, customerName, {
-                id: messageId,
-                from: fromPhone,
-                timestamp: message.timestamp,
-                type: message.type,
-                text: message.text,
-                interactive: message.interactive,
-                actionId,
-                content: messageContent,
+                text: message.type === 'text' ? messageContent : undefined,
+                buttonReplyId: interactiveType === 'button' ? (actionId || undefined) : undefined,
+                listReplyId: interactiveType === 'list' ? (actionId || undefined) : undefined,
               })
             } else {
               console.warn('[WhatsApp Webhook] processWhatsAppMessage not yet ready in bot module.')

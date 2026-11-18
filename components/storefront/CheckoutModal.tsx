@@ -122,8 +122,8 @@ export default function CheckoutModal({ open, onClose }: CheckoutModalProps) {
         status: isDelivery ? ('AWAITING_DELIVERY_FEE' as const) : ('PENDING_PAYMENT' as const),
       }
 
-      const { data: order, error: orderErr } = await supabase
-        .from('orders')
+      const { data: order, error: orderErr } = await (supabase
+        .from('orders') as any)
         .insert(orderPayload)
         .select()
         .single()
@@ -132,7 +132,7 @@ export default function CheckoutModal({ open, onClose }: CheckoutModalProps) {
 
       // Insert order items
       const orderItems = items.map((item) => ({
-        order_id: order.id,
+        order_id: (order as any).id,
         menu_item_id: item.menuItemId,
         item_variant_id: item.variantId ?? null,
         item_name: item.name,
@@ -143,15 +143,15 @@ export default function CheckoutModal({ open, onClose }: CheckoutModalProps) {
         modifiers_snapshot: item.selectedModifiers.length > 0 ? item.selectedModifiers : null,
       }))
 
-      const { error: itemsErr } = await supabase.from('order_items').insert(orderItems)
+      const { error: itemsErr } = await (supabase.from('order_items') as any).insert(orderItems)
       if (itemsErr) throw itemsErr
 
-      setCurrentOrder(order)
-      addActiveOrderId(order.id)
+      setCurrentOrder(order as any)
+      addActiveOrderId((order as any).id)
 
       if (isDelivery) {
         setStep('awaiting_fee')
-        subscribeToOrderUpdates(order.id)
+        subscribeToOrderUpdates((order as any).id)
       } else {
         setStep('payment')
       }
@@ -169,7 +169,7 @@ export default function CheckoutModal({ open, onClose }: CheckoutModalProps) {
   const handleCancelOrder = async () => {
     if (!currentOrder) return
     const supabase = createClient()
-    await supabase.from('orders').update({ status: 'CANCELLED' }).eq('id', currentOrder.id)
+    await (supabase.from('orders') as any).update({ status: 'CANCELLED' }).eq('id', currentOrder.id)
     if (channelRef.current) supabase.removeChannel(channelRef.current)
     clearCart()
     onClose()
@@ -182,8 +182,8 @@ export default function CheckoutModal({ open, onClose }: CheckoutModalProps) {
       const supabase = createClient()
 
       if (paymentMethod === 'PAY_ON_ARRIVAL') {
-        const { error: err } = await supabase
-          .from('orders')
+        const { error: err } = await (supabase
+          .from('orders') as any)
           .update({ status: 'CONFIRMED', payment_status: 'UNPAID' })
           .eq('id', currentOrder.id)
         if (err) throw err

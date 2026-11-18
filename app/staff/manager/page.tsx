@@ -2,6 +2,8 @@ import { Metadata } from 'next'
 import { Suspense } from 'react'
 import ManagerClient from './manager-client'
 
+export const runtime = 'edge'
+
 export const metadata: Metadata = {
   title: 'Branch Manager Dashboard | Chicken Town SL',
   description: 'Manage branch item stock availability, live shift accounting, and End-of-Day (EOD) Z-Reports.',

@@ -26,6 +26,7 @@ import {
   AlertCircle,
   Clock,
   Sparkles,
+  Layers,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useStaffStore, canAccessManager, DEMO_PRESETS } from '@/lib/staff-auth'
@@ -268,15 +269,16 @@ export default function ManagerClient() {
 
     // 1. Fetch active accounting date for branch
     try {
-      const { data: dateData } = await supabase
-        .from('branch_accounting_days')
+      const { data: dateData } = await (supabase
+        .from('branch_accounting_days') as any)
         .select('active_accounting_date')
         .eq('branch_id', branchId)
         .maybeSingle()
 
-      if (dateData?.active_accounting_date) {
-        setActiveDate(dateData.active_accounting_date)
-        setActiveAccountingDate(dateData.active_accounting_date)
+      const row = dateData as { active_accounting_date?: string } | null
+      if (row?.active_accounting_date) {
+        setActiveDate(row.active_accounting_date)
+        setActiveAccountingDate(row.active_accounting_date)
       } else {
         // Fallback default
         setActiveDate('2024-11-17')
@@ -390,7 +392,7 @@ export default function ManagerClient() {
 
     try {
       const supabase = createClient()
-      await supabase.from('branch_item_availability').upsert(
+      await (supabase.from('branch_item_availability') as any).upsert(
         {
           branch_id: selectedBranchId,
           menu_item_id: itemId,
@@ -421,7 +423,7 @@ export default function ManagerClient() {
         is_available: true,
         updated_at: new Date().toISOString(),
       }))
-      await supabase.from('branch_item_availability').upsert(rows, {
+      await (supabase.from('branch_item_availability') as any).upsert(rows, {
         onConflict: 'branch_id,menu_item_id',
       })
     } catch (err) {
@@ -568,8 +570,8 @@ export default function ManagerClient() {
       }
 
       // 2. Insert snapshot into eod_z_reports
-      const { data: insertedReport, error: insertError } = await supabase
-        .from('eod_z_reports')
+      const { data: insertedReport, error: insertError } = await (supabase
+        .from('eod_z_reports') as any)
         .insert({
           branch_id: selectedBranchId,
           accounting_date: activeDate,
@@ -585,7 +587,7 @@ export default function ManagerClient() {
       const nextDateStr = currentDateObj.toISOString().split('T')[0]
 
       // 4. Update branch_accounting_days
-      await supabase.from('branch_accounting_days').upsert(
+      await (supabase.from('branch_accounting_days') as any).upsert(
         {
           branch_id: selectedBranchId,
           active_accounting_date: nextDateStr,
@@ -603,7 +605,7 @@ export default function ManagerClient() {
 
       // 7. Add new report to historical list
       const newReportEntry: ZReport = {
-        id: insertedReport?.id || `z-${Date.now()}`,
+        id: (insertedReport as any)?.id || `z-${Date.now()}`,
         branch_id: selectedBranchId,
         accounting_date: activeDate,
         report_data: snapshotData,

@@ -1,9 +1,6 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
-
-const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Chicken Town SL | SWIT U MOT SWIT U LYF',
@@ -18,7 +15,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} bg-off-white text-charcoal antialiased`}>
+      <body className="font-sans bg-off-white text-charcoal antialiased">
         {children}
         <Toaster />
       </body>

@@ -45,24 +45,20 @@ export function ItemCustomizerModal({
       setModifierCounts({})
       setQuantity(1)
     }
-  }, [item?.id])
+  }, [item])
 
-  if (!isModalOpen || !item) {
-    return null
-  }
-
-  const hasVariants = (item.variants?.length ?? 0) > 0
-  const hasModifierGroups = (item.modifier_groups?.length ?? 0) > 0
+  const hasVariants = (item?.variants?.length ?? 0) > 0
+  const hasModifierGroups = (item?.modifier_groups?.length ?? 0) > 0
 
   const selectedVariant: ItemVariant | null = hasVariants
-    ? (item.variants?.find((v) => v.id === selectedVariantId) ?? item.variants![0])
+    ? (item?.variants?.find((v) => v.id === selectedVariantId) ?? item?.variants?.[0] ?? null)
     : null
 
-  const basePrice = selectedVariant ? selectedVariant.price : (item.base_price ?? 0)
+  const basePrice = selectedVariant ? selectedVariant.price : (item?.base_price ?? 0)
 
   // Calculate total price delta from modifiers
   const modTotal = useMemo(() => {
-    if (!hasModifierGroups || !item.modifier_groups) return 0
+    if (!item?.modifier_groups) return 0
     let total = 0
     for (const group of item.modifier_groups) {
       const counts = modifierCounts[group.id] || {}
@@ -74,14 +70,14 @@ export function ItemCustomizerModal({
       }
     }
     return total
-  }, [hasModifierGroups, item.modifier_groups, modifierCounts])
+  }, [item?.modifier_groups, modifierCounts])
 
   const unitPrice = basePrice + modTotal
   const totalPrice = unitPrice * quantity
 
   // Check required modifier groups validation
   const { isValid, incompleteGroups } = useMemo(() => {
-    if (!hasModifierGroups || !item.modifier_groups) {
+    if (!item?.modifier_groups) {
       return { isValid: true, incompleteGroups: [] }
     }
 
@@ -98,7 +94,11 @@ export function ItemCustomizerModal({
       }
     }
     return { isValid: incomplete.length === 0, incompleteGroups: incomplete }
-  }, [hasModifierGroups, item.modifier_groups, modifierCounts])
+  }, [item?.modifier_groups, modifierCounts])
+
+  if (!isModalOpen || !item) {
+    return null
+  }
 
   // Single select (radio toggle)
   const handleSingleSelect = (group: ModifierGroup, option: ModifierOption) => {

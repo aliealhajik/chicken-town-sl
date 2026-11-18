@@ -154,11 +154,40 @@ export async function sendWhatsAppText(
  */
 export async function sendWhatsAppButtons(
   to: string,
+  body: string,
+  buttons: WhatsAppButton[]
+): Promise<WhatsAppSendResult>
+export async function sendWhatsAppButtons(
+  to: string,
   header: string | undefined,
   body: string,
   footer: string | undefined,
   buttons: WhatsAppButton[]
+): Promise<WhatsAppSendResult>
+export async function sendWhatsAppButtons(
+  to: string,
+  headerOrBody: string | undefined,
+  bodyOrButtons: string | WhatsAppButton[],
+  footer?: string | undefined,
+  buttonsParam?: WhatsAppButton[]
 ): Promise<WhatsAppSendResult> {
+  let header: string | undefined
+  let body: string
+  let footerText: string | undefined
+  let buttons: WhatsAppButton[]
+
+  if (Array.isArray(bodyOrButtons)) {
+    header = undefined
+    body = headerOrBody || ''
+    footerText = undefined
+    buttons = bodyOrButtons
+  } else {
+    header = headerOrBody
+    body = bodyOrButtons || ''
+    footerText = footer
+    buttons = buttonsParam || []
+  }
+
   const formattedButtons = buttons.slice(0, 3).map((b) => ({
     type: 'reply',
     reply: {
@@ -180,9 +209,9 @@ export async function sendWhatsAppButtons(
     }
   }
 
-  if (footer && footer.trim()) {
+  if (footerText && footerText.trim()) {
     interactivePayload.footer = {
-      text: footer.substring(0, 60),
+      text: footerText.substring(0, 60),
     }
   }
 

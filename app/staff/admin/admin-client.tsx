@@ -302,6 +302,24 @@ export default function AdminClient() {
     }
   }, [qrMode, singleTableNum, batchStart, batchEnd])
 
+  // Filtered menu items
+  const filteredMenuItems = useMemo(() => {
+    let list = menuItems
+    if (selectedCategoryId !== 'all') {
+      list = list.filter((i) => i.categoryId === selectedCategoryId)
+    }
+    if (menuSearch.trim()) {
+      const q = menuSearch.toLowerCase().trim()
+      list = list.filter(
+        (i) =>
+          i.name.toLowerCase().includes(q) ||
+          i.description?.toLowerCase().includes(q) ||
+          i.slug.toLowerCase().includes(q)
+      )
+    }
+    return list
+  }, [menuItems, selectedCategoryId, menuSearch])
+
   // ───────────────────────────────────────────────────────────────────────────
   // ACCESS CONTROL RESTRICTION
   // ───────────────────────────────────────────────────────────────────────────
@@ -452,24 +470,6 @@ export default function AdminClient() {
       setMenuItems((prev) => prev.filter((i) => i.id !== itemId))
     }
   }
-
-  // Filtered menu items
-  const filteredMenuItems = useMemo(() => {
-    let list = menuItems
-    if (selectedCategoryId !== 'all') {
-      list = list.filter((i) => i.categoryId === selectedCategoryId)
-    }
-    if (menuSearch.trim()) {
-      const q = menuSearch.toLowerCase().trim()
-      list = list.filter(
-        (i) =>
-          i.name.toLowerCase().includes(q) ||
-          i.description?.toLowerCase().includes(q) ||
-          i.slug.toLowerCase().includes(q)
-      )
-    }
-    return list
-  }, [menuItems, selectedCategoryId, menuSearch])
 
   // ───────────────────────────────────────────────────────────────────────────
   // STAFF ACTIONS

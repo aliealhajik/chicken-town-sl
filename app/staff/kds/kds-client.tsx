@@ -249,8 +249,8 @@ export function KdsClient() {
         .in('status', ['CONFIRMED', 'PREPARING', 'READY'])
         .order('created_at', { ascending: true })
 
-      if (!orderErr && dbOrders && dbOrders.length > 0) {
-        const mapped: KdsOrder[] = dbOrders.map((o) => ({
+      if (!orderErr && dbOrders && (dbOrders as any[]).length > 0) {
+        const mapped: KdsOrder[] = (dbOrders as any[]).map((o: any) => ({
           id: o.id,
           order_number: o.order_number,
           order_source: o.order_source as KdsOrder['order_source'],
@@ -262,7 +262,7 @@ export function KdsClient() {
           order_notes: o.order_notes,
           status: o.status,
           created_at: o.created_at,
-          items: (o.order_items || []).map((it) => ({
+          items: ((o.order_items as any[]) || []).map((it: any) => ({
             id: it.id,
             item_name: it.item_name,
             variant_name: it.variant_name,
@@ -375,8 +375,7 @@ export function KdsClient() {
     // 2. Persist to Supabase
     try {
       const supabase = createClient()
-      await supabase
-        .from('orders')
+      await (supabase.from('orders') as any)
         .update({ status: nextStatus, updated_at: new Date().toISOString() })
         .eq('id', orderId)
     } catch (err) {

@@ -4,6 +4,8 @@ import {
   notifyWhatsAppOrderStatus,
 } from '@/lib/whatsapp-notifications'
 
+export const runtime = 'edge'
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()

@@ -131,8 +131,7 @@ export default function CashierClient() {
     const supabase = createClient()
     const newTotal = Number(order.subtotal) + feeValue
 
-    const { error } = await supabase
-      .from('orders')
+    const { error } = await (supabase.from('orders') as any)
       .update({
         delivery_fee: feeValue,
         total_amount: newTotal,
@@ -183,8 +182,7 @@ export default function CashierClient() {
   const handleSettlePayment = async (orderId: string, orderNumber: string) => {
     setActionLoading((prev) => ({ ...prev, [orderId]: true }))
     const supabase = createClient()
-    const { error } = await supabase
-      .from('orders')
+    const { error } = await (supabase.from('orders') as any)
       .update({
         payment_status: 'PAID',
       })
@@ -206,8 +204,7 @@ export default function CashierClient() {
   ) => {
     setActionLoading((prev) => ({ ...prev, [orderId]: true }))
     const supabase = createClient()
-    const { error } = await supabase
-      .from('orders')
+    const { error } = await (supabase.from('orders') as any)
       .update({ status: newStatus })
       .eq('id', orderId)
 
@@ -266,8 +263,8 @@ export default function CashierClient() {
     () =>
       orders.filter(
         (o) =>
-          o.status === 'COMPLETED' ||
-          (o.accounting_date === activeAccountingDate && o.status === 'COMPLETED')
+          o.status === 'COMPLETED' &&
+          (!activeAccountingDate || o.accounting_date === activeAccountingDate)
       ),
     [orders, activeAccountingDate]
   )
@@ -584,7 +581,7 @@ export default function CashierClient() {
                     )}
                     {order.order_notes && (
                       <div className="mt-1.5 rounded bg-black/40 p-1.5 font-medium italic text-yellow-200">
-                        "{order.order_notes}"
+                        &ldquo;{order.order_notes}&rdquo;
                       </div>
                     )}
                   </div>

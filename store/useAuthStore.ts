@@ -46,16 +46,17 @@ export const useAuthStore = create<AuthState>()(
           })
           if (error) throw error
           if (data.user) {
-            const { data: profile } = await supabase
-              .from('staff_profiles')
+            const { data: profile } = await (supabase
+              .from('staff_profiles') as any)
               .select('full_name, phone')
               .eq('id', data.user.id)
               .single()
+            const profileData = profile as { full_name?: string; phone?: string } | null
             set({
               user: {
                 id: data.user.id,
-                name: profile?.full_name ?? data.user.user_metadata?.full_name ?? '',
-                phone: profile?.phone ?? phone,
+                name: profileData?.full_name ?? data.user.user_metadata?.full_name ?? '',
+                phone: profileData?.phone ?? phone,
                 email: data.user.email,
               },
               isLoading: false,

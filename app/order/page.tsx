@@ -2,6 +2,8 @@ import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import OrderClient from './order-client'
 
+export const runtime = 'edge'
+
 export const metadata: Metadata = {
   title: 'Order Online | Chicken Town SL',
   description: 'Order hot & fresh fried chicken, wings, jollof rice, and meal deals in Freetown, Sierra Leone. Fast delivery from 392 or pickup from 7 branches.',

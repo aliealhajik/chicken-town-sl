@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { createMonimeCheckoutSession } from '@/lib/monime'
+import type { Order } from '@/types/database.types'
+
+export const runtime = 'edge'
 
 export async function POST(request: Request) {
   try {
@@ -17,11 +20,13 @@ export async function POST(request: Request) {
     const supabase = await createServiceClient()
 
     // 1. Fetch order
-    const { data: order, error: orderError } = await supabase
+    const { data, error: orderError } = await supabase
       .from('orders')
       .select('*')
       .eq('id', order_id)
       .single()
+
+    const order = data as Order | null
 
     if (orderError || !order) {
       return NextResponse.json(
@@ -47,8 +52,7 @@ export async function POST(request: Request) {
     }
 
     // 3. Mark status as PENDING_PAYMENT if not already
-    await supabase
-      .from('orders')
+    await (supabase.from('orders') as any)
       .update({
         status: 'PENDING_PAYMENT',
         payment_method: 'MONIME',

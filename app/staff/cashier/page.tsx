@@ -1,6 +1,8 @@
 import { Suspense } from 'react'
 import CashierClient from './cashier-client'
 
+export const runtime = 'edge'
+
 export const metadata = {
   title: 'Cashier & Dispatch Portal | Chicken Town SL',
   description: 'Manage counter sales, delivery fees, settlements, and order dispatching.',

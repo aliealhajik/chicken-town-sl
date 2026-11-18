@@ -2,6 +2,8 @@ import { Metadata } from 'next'
 import { Suspense } from 'react'
 import { KdsClient } from './kds-client'
 
+export const runtime = 'edge'
+
 export const metadata: Metadata = {
   title: 'Kitchen Display System (KDS) | Chicken Town SL',
   description:
