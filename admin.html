@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chicken Town SL | Kitchen Display System & Staff Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        },
+                        flame: {
+                            500: '#ef4444',
+                            600: '#dc2626',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Pure JavaScript Offline QR Code Generator -->
+    <script src="js/qrcode.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-stone-900 text-stone-100 min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+
+    <!-- KDS Header Bar -->
+    <header class="sticky top-0 z-40 bg-stone-950/90 backdrop-blur-md border-b border-stone-800 px-4 sm:px-6 py-3.5">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <a href="index.html" class="flex items-center space-x-2 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-flame-600 to-brand-500 flex items-center justify-center text-white shadow-md">
+                        <span class="text-xl">🍗</span>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="font-extrabold text-lg text-white font-display tracking-tight">CHICKEN TOWN KDS</span>
+                            <span class="bg-brand-500 text-stone-950 font-black text-[10px] px-1.5 py-0.5 rounded">STAFF</span>
+                        </div>
+                        <p class="text-[11px] text-stone-400">Kitchen Display & Store Operations</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Central Live Clock & Sound Toggle -->
+            <div class="flex items-center space-x-4">
+                <div class="hidden md:flex items-center space-x-2 text-xs text-stone-300 bg-stone-900 px-3 py-1.5 rounded-xl border border-stone-800">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span id="liveClock" class="font-mono font-semibold">12:00:00 PM</span>
+                </div>
+
+                <!-- Test Sound Bell -->
+                <button id="soundToggleBtn" onclick="toggleKitchenSound()" class="flex items-center space-x-1.5 text-xs font-bold bg-stone-800 hover:bg-stone-700 text-stone-200 px-3 py-1.5 rounded-xl border border-stone-700 transition">
+                    <i data-lucide="bell" id="bellIcon" class="w-4 h-4 text-brand-400"></i>
+                    <span id="soundStatusText">Chime: ON</span>
+                </button>
+
+                <!-- Switch to Customer Storefront -->
+                <a href="index.html" target="_blank" class="flex items-center space-x-1.5 text-xs font-bold bg-brand-500 hover:bg-brand-400 text-stone-950 px-3.5 py-1.5 rounded-xl transition shadow-md shadow-brand-500/20">
+                    <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
+                    <span>Customer Storefront</span>
+                </a>
+
+                <!-- WhatsApp Bot Simulator -->
+                <a href="whatsapp-bot/simulator.html" target="_blank" class="flex items-center space-x-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-xl transition shadow-md shadow-emerald-600/20">
+                    <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                    <span>WhatsApp Bot</span>
+                </a>
+
+                <!-- Lock Screen Button -->
+                <button onclick="window.lockStaffPortal()" title="Lock Screen" class="flex items-center space-x-1.5 text-xs font-bold bg-stone-800 hover:bg-flame-900/60 text-stone-300 hover:text-white px-3 py-1.5 rounded-xl border border-stone-700 transition">
+                    <i data-lucide="lock" class="w-3.5 h-3.5 text-flame-400"></i>
+                    <span>Lock</span>
+                </button>
+
+                <!-- Store Settings Button -->
+                <button onclick="window.openSettingsModal()" title="Store Settings" class="flex items-center space-x-1 text-xs font-bold bg-stone-800 hover:bg-stone-700 text-stone-300 px-2.5 py-1.5 rounded-xl border border-stone-700 transition">
+                    <i data-lucide="settings" class="w-3.5 h-3.5 text-stone-400"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Admin Dashboard -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">
+
+        <!-- Metrics Overview Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="bg-stone-800/80 border border-stone-700/80 rounded-2xl p-4">
+                <div class="flex items-center justify-between text-stone-400 text-xs font-bold uppercase tracking-wider mb-2">
+                    <span>Active In Kitchen</span>
+                    <i data-lucide="flame" class="w-4 h-4 text-flame-500"></i>
+                </div>
+                <div id="statActiveCount" class="text-3xl font-black text-white font-mono">0</div>
+                <p class="text-[11px] text-stone-400 mt-1">Orders currently cooking</p>
+            </div>
+
+            <div class="bg-stone-800/80 border border-stone-700/80 rounded-2xl p-4">
+                <div class="flex items-center justify-between text-stone-400 text-xs font-bold uppercase tracking-wider mb-2">
+                    <span>Today's Total Orders</span>
+                    <i data-lucide="clipboard-list" class="w-4 h-4 text-brand-400"></i>
+                </div>
+                <div id="statTotalOrders" class="text-3xl font-black text-white font-mono">0</div>
+                <p class="text-[11px] text-stone-400 mt-1">Received today</p>
+            </div>
+
+            <div class="bg-stone-800/80 border border-stone-700/80 rounded-2xl p-4">
+                <div class="flex items-center justify-between text-stone-400 text-xs font-bold uppercase tracking-wider mb-2">
+                    <span>Total Revenue</span>
+                    <i data-lucide="banknote" class="w-4 h-4 text-emerald-400"></i>
+                </div>
+                <div id="statRevenue" class="text-3xl font-black text-emerald-400 font-mono">Le 0</div>
+                <p class="text-[11px] text-stone-400 mt-1">Paid & in-flight revenue</p>
+            </div>
+
+            <div class="bg-stone-800/80 border border-stone-700/80 rounded-2xl p-4">
+                <div class="flex items-center justify-between text-stone-400 text-xs font-bold uppercase tracking-wider mb-2">
+                    <span>Avg Prep Time</span>
+                    <i data-lucide="timer" class="w-4 h-4 text-amber-400"></i>
+                </div>
+                <div class="text-3xl font-black text-white font-mono">16 min</div>
+                <p class="text-[11px] text-emerald-400 mt-1">⚡ 4m faster than target</p>
+            </div>
+        </div>
+
+        <!-- Tab Controls: Kitchen Tickets vs Menu Stock vs Table QR Standees -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-800 pb-3 mb-6">
+            <div class="flex flex-wrap gap-2">
+                <button id="tabOrdersBtn" onclick="switchAdminTab('orders')" class="px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition bg-brand-500 text-stone-950 shadow-md">
+                    Live Kitchen Tickets (<span id="ticketCountBadge">0</span>)
+                </button>
+                <button id="tabStockBtn" onclick="switchAdminTab('stock')" class="px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition bg-stone-800 text-stone-400 hover:text-white">
+                    Menu Items & Stock
+                </button>
+                <button id="tabStandeesBtn" onclick="switchAdminTab('standees')" class="px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition bg-stone-800 text-stone-400 hover:text-white flex items-center gap-1.5">
+                    <i data-lucide="qr-code" class="w-3.5 h-3.5 text-brand-400"></i>
+                    <span>Table QR Standees</span>
+                </button>
+            </div>
+
+            <!-- Filter Status for Orders -->
+            <div id="statusFilterBar" class="flex items-center space-x-1.5 text-xs overflow-x-auto pb-1 sm:pb-0">
+                <span class="text-stone-400 mr-1 text-[11px]">Filter:</span>
+                <button onclick="filterKdsStatus('all')" class="status-pill px-2.5 py-1 rounded-lg bg-stone-700 text-white font-bold text-xs">All</button>
+                <button onclick="filterKdsStatus('dine_in')" class="status-pill px-2.5 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-amber-300 font-bold text-xs">🍽️ Dine-In</button>
+                <button onclick="filterKdsStatus('received')" class="status-pill px-2.5 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs">New</button>
+                <button onclick="filterKdsStatus('preparing')" class="status-pill px-2.5 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs">Frying</button>
+                <button onclick="filterKdsStatus('out_for_delivery')" class="status-pill px-2.5 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs">Ready/Rider</button>
+                <button onclick="filterKdsStatus('completed')" class="status-pill px-2.5 py-1 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs">Completed</button>
+            </div>
+        </div>
+
+        <!-- 1. Orders Panel View -->
+        <section id="ordersView">
+            <div id="ticketsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Kitchen tickets injected via admin.js -->
+            </div>
+            <!-- Empty state when no orders match -->
+            <div id="noOrdersState" class="hidden text-center py-20 bg-stone-800/40 rounded-3xl border border-dashed border-stone-700">
+                <div class="text-4xl mb-3">🍗</div>
+                <h3 class="text-lg font-bold text-white">All Caught Up!</h3>
+                <p class="text-stone-400 text-xs max-w-sm mx-auto mt-1">There are no pending tickets in this category. Place a test order in the storefront or scan a table QR code to watch it appear in real-time.</p>
+            </div>
+        </section>
+
+        <!-- 2. Menu Items & Stock Management View -->
+        <section id="stockView" class="hidden">
+            <div class="bg-stone-800/90 rounded-3xl border border-stone-700 p-6">
+                <!-- Header Controls: Title, Search & Actions -->
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5 pb-4 border-b border-stone-700">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <h3 class="text-lg font-bold text-white font-display">Menu Items, Photos & Stock Availability</h3>
+                            <span id="stockTotalBadge" class="bg-brand-500/20 text-brand-400 border border-brand-500/30 text-[10px] font-black px-2 py-0.5 rounded-full font-mono">59 ITEMS</span>
+                        </div>
+                        <p class="text-xs text-stone-400 mt-0.5">Edit food photos, update prices, toggle in-stock/sold-out status, or manage drinks & sauces.</p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <!-- Live Search Input -->
+                        <div class="relative w-full sm:w-64">
+                            <input type="text" id="stockSearchInput" placeholder="Search dishes, drinks, beers..." oninput="window.filterStockSearch(this.value)" class="w-full pl-9 pr-3 py-2 bg-stone-900 border border-stone-700 rounded-xl text-white text-xs placeholder-stone-500 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                            <i data-lucide="search" class="w-4 h-4 text-stone-500 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                        </div>
+
+                        <!-- Restore Defaults Button -->
+                        <button onclick="window.resetMenuToOfficial()" class="px-3 py-2 bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold rounded-xl text-xs transition border border-stone-700 flex items-center space-x-1.5" title="Restore all 59 official menu items, drinks and sauces">
+                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-stone-400"></i>
+                            <span>Reset Defaults</span>
+                        </button>
+
+                        <!-- Add New Item Button -->
+                        <button onclick="window.openItemEditModal(null)" class="px-4 py-2 bg-brand-500 hover:bg-brand-400 text-stone-950 font-black rounded-xl text-xs transition flex items-center space-x-1.5 shadow-md active:scale-95">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                            <span>+ Add Dish / Drink</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Category Filter Pills Bar -->
+                <div class="mb-4">
+                    <div id="stockCategoryFilterBar" class="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs">
+                        <!-- Rendered via bundle-admin.js -->
+                    </div>
+                </div>
+
+                <!-- Filter Results Summary -->
+                <div class="flex items-center justify-between text-xs text-stone-400 mb-3 px-1">
+                    <span id="stockCountSummary">Showing all items</span>
+                    <span id="stockSoldOutSummary" class="text-flame-400 font-bold"></span>
+                </div>
+
+                <!-- Stock Items Grid -->
+                <div id="stockGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Injected via bundle-admin.js -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Table QR Standees Generator & Printer View -->
+        <section id="standeesView" class="hidden">
+            <div class="bg-stone-800/90 rounded-3xl border border-stone-700 p-6 mb-8">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-stone-700">
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <h3 class="text-lg font-bold text-white font-display">Dine-In Table QR Standees</h3>
+                            <span class="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-extrabold px-2 py-0.5 rounded-full">PRINT READY</span>
+                        </div>
+                        <p class="text-xs text-stone-400 mt-0.5">Generate QR code tent cards for your dining tables. Guests scan with their phone camera to order hot food straight to their seat.</p>
+                    </div>
+
+                    <!-- Print & Actions -->
+                    <div class="flex items-center space-x-3">
+                        <button onclick="window.printStandees()" class="px-4 py-2.5 bg-brand-500 hover:bg-brand-400 text-stone-950 font-extrabold rounded-xl text-xs transition flex items-center space-x-1.5 shadow-lg shadow-brand-500/20 active:scale-95">
+                            <i data-lucide="printer" class="w-4 h-4"></i>
+                            <span>Print Table Standees</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Generator Controls -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-5 p-4 bg-stone-900 rounded-2xl border border-stone-800 text-xs">
+                    <div>
+                        <label class="block font-bold text-stone-400 mb-1">Start Table #</label>
+                        <input type="number" id="qrStartTable" value="1" min="1" max="50" class="w-full px-3 py-2 bg-stone-800 border border-stone-700 rounded-xl text-white font-mono font-bold focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-stone-400 mb-1">End Table #</label>
+                        <input type="number" id="qrEndTable" value="12" min="1" max="50" class="w-full px-3 py-2 bg-stone-800 border border-stone-700 rounded-xl text-white font-mono font-bold focus:ring-2 focus:ring-brand-500">
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="window.generateTableStandees()" class="w-full py-2 bg-stone-800 hover:bg-stone-700 text-white font-bold rounded-xl border border-stone-700 transition">
+                            Regenerate Preview
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Printable Standees Container -->
+            <div id="printable-standees" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Injected via bundle-admin.js -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Item Edit / Add Modal -->
+    <div id="itemEditModalBackdrop" class="fixed inset-0 bg-stone-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-stone-900 rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-stone-700 p-6 sm:p-7 text-xs text-stone-200">
+            <div class="flex items-center justify-between pb-3 border-b border-stone-800 mb-4">
+                <h3 id="modalEditTitle" class="text-lg font-black text-white font-display">Edit Menu Item</h3>
+                <button onclick="window.closeItemEditModal()" class="w-8 h-8 rounded-full bg-stone-800 hover:bg-stone-700 flex items-center justify-center text-stone-400">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <form id="itemEditForm" onsubmit="window.saveMenuItem(event)" class="space-y-4">
+                <input type="hidden" id="editItemId">
+
+                <div>
+                    <label class="block font-bold text-stone-300 mb-1">Item / Meal Name <span class="text-flame-500">*</span></label>
+                    <input type="text" id="editItemName" required class="w-full px-3.5 py-2.5 bg-stone-800 border border-stone-700 rounded-xl text-white focus:ring-2 focus:ring-brand-500 text-xs">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-stone-300 mb-1">Price (in Le) <span class="text-flame-500">*</span></label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 font-mono font-bold text-stone-400">Le</span>
+                            <input type="number" id="editItemPrice" required min="1" step="any" class="w-full pl-8 pr-3 py-2.5 bg-stone-800 border border-stone-700 rounded-xl text-white font-mono font-bold focus:ring-2 focus:ring-brand-500 text-xs">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-stone-300 mb-1">Category</label>
+                        <select id="editItemCategory" class="w-full px-3 py-2.5 bg-stone-800 border border-stone-700 rounded-xl text-white focus:ring-2 focus:ring-brand-500 text-xs">
+                            <option value="deals">Top Sellers & Meal Deals</option>
+                            <option value="burgers_wraps">Burgers & Wraps</option>
+                            <option value="chicken">Fried & BBQ Chicken</option>
+                            <option value="fowls">Fowls (Pepper Chicken)</option>
+                            <option value="celebration">Celebration Deals</option>
+                            <option value="sides">Sides & Rice</option>
+                            <option value="desserts">Swit U Mot (Ice Cream)</option>
+                            <option value="drinks">Drinks & Beers</option>
+                            <option value="sauces">Extra Sauces</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Photo URL, Local File Path, or File Upload -->
+                <div>
+                    <label class="block font-bold text-stone-300 mb-1">Food Photo (URL, images/filename.jpg, or Upload)</label>
+                    <input type="text" id="editItemImageUrl" placeholder="https://... or images/dish.jpg or upload below" class="w-full px-3.5 py-2 bg-stone-800 border border-stone-700 rounded-xl text-white text-xs focus:ring-2 focus:ring-brand-500 mb-2">
+                    
+                    <div class="flex items-center space-x-3">
+                        <label class="cursor-pointer bg-stone-800 hover:bg-stone-700 border border-stone-700 px-3 py-1.5 rounded-xl text-[11px] font-bold text-stone-300 transition flex items-center gap-1.5">
+                            <i data-lucide="upload" class="w-3.5 h-3.5 text-brand-400"></i>
+                            <span>Upload Local Photo</span>
+                            <input type="file" id="editItemFileInput" accept="image/*" class="hidden" onchange="window.handleImageUpload(event)">
+                        </label>
+                        <div id="editImagePreviewContainer" class="w-12 h-12 rounded-xl overflow-hidden bg-stone-800 border border-stone-700 flex items-center justify-center flex-shrink-0">
+                            <img id="editImagePreview" src="" alt="Preview" class="w-full h-full object-cover hidden">
+                            <span id="noPreviewText" class="text-[9px] text-stone-500">None</span>
+                        </div>
+                        <span id="uploadStatusText" class="text-[10px] text-stone-400"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-stone-300 mb-1">Badge (Optional, e.g. Best Seller, Top Value)</label>
+                    <input type="text" id="editItemBadge" placeholder="e.g. Popular, Top Seller, BBQ Special" class="w-full px-3.5 py-2 bg-stone-800 border border-stone-700 rounded-xl text-white text-xs focus:ring-2 focus:ring-brand-500">
+                </div>
+
+                <div>
+                    <label class="block font-bold text-stone-300 mb-1">Description & Ingredients</label>
+                    <textarea id="editItemDesc" rows="3" class="w-full px-3.5 py-2 bg-stone-800 border border-stone-700 rounded-xl text-white text-xs focus:ring-2 focus:ring-brand-500"></textarea>
+                </div>
+
+                <div class="pt-3 border-t border-stone-800 flex items-center justify-between">
+                    <button type="button" id="btnDeleteItem" onclick="window.deleteMenuItem()" class="px-3.5 py-2 bg-flame-600/20 hover:bg-flame-600/40 text-flame-400 border border-flame-600/40 rounded-xl font-bold transition">
+                        Delete Dish
+                    </button>
+                    <div class="flex space-x-2">
+                        <button type="button" onclick="window.closeItemEditModal()" class="px-4 py-2 bg-stone-800 hover:bg-stone-700 rounded-xl font-bold text-stone-300">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-5 py-2 bg-brand-500 hover:bg-brand-400 text-stone-950 font-extrabold rounded-xl shadow-md transition">
+                            Save Dish
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Staff PIN Lock Overlay -->
+    <div id="staffLockOverlay" class="fixed inset-0 bg-stone-950/95 backdrop-blur-md z-50 flex items-center justify-center p-4 transition-opacity duration-200">
+        <div class="bg-stone-900 border border-stone-800 rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center shadow-2xl">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-flame-600 to-brand-500 flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg shadow-brand-500/20">
+                🍗
+            </div>
+            <h2 class="text-xl font-black text-white font-display">CHICKEN TOWN KDS</h2>
+            <p class="text-xs text-stone-400 mt-1 mb-5">Staff & Kitchen Operations Portal</p>
+
+            <form onsubmit="window.handleStaffUnlock(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-stone-300 mb-2">Enter 4-Digit Staff PIN</label>
+                    <input type="password" id="staffPinInput" maxlength="6" autofocus
+                        placeholder="••••"
+                        class="w-full text-center text-2xl tracking-[0.5em] font-mono font-black py-3 px-4 bg-stone-950 border border-stone-700 focus:border-brand-500 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-brand-500/30">
+                </div>
+
+                <div id="pinErrorMsg" class="text-xs text-flame-400 font-bold hidden">
+                    ✕ Incorrect PIN. Please try again.
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 pt-2">
+                    <button type="button" onclick="window.enterPinDigit('1')" class="py-3 bg-stone-800 hover:bg-stone-700 active:scale-95 text-white font-black text-lg rounded-xl transition">1</button>
+                    <button type="button" onclick="window.enterPinDigit('2')" class="py-3 bg-stone-800 hover:bg-stone-700 active:scale-95 text-white font-black text-lg rounded-xl transition">2</button>
+                    <button type="button" onclick="window.enterPinDigit('3')" class="py-3 bg-stone-800 hover:bg-stone-700 active:scale-95 text-white font-black text-lg rounded-xl transition">3</button>
+                    <button type="button" onclick="window.enterPinDigit('4')" class="py-3 bg-stone-800 hover:bg-stone-700 active:scale-95 text-white font-black text-lg rounded-xl transition">4</button>
+                    <button type="button" onclick="window.enterPinDigit('5')" class="py-3 bg-stone-800 hover:bg-stone-700 active:scale-95 text-white font-black text-lg rounded-xl transition">5</button>
+                    <button type="button" onclick="window.enterPinDigit('6')" class="py-3 bg-stone-800 hover:bg-stone-700 active:scale-95 text-white font-black text-lg rounded-xl transition">6</button>
+                    <button type="button" onclick="window.enterPinDigit('7')" class="py-3 bg-stone-800 hover:bg-stone-700 active:scale-95 text-white font-black text-lg rounded-xl transition">7</button>
+                    <button type="button" onclick="window.enterPinDigit('8')" class="py-3 bg-stone-800 hover:bg-stone-700 active:scale-95 text-white font-black text-lg rounded-xl transition">8</button>
+                    <button type="button" onclick="window.enterPinDigit('9')" class="py-3 bg-stone-800 hover:bg-stone-700 active:scale-95 text-white font-black text-lg rounded-xl transition">9</button>
+                    <button type="button" onclick="window.clearPinInput()" class="py-3 bg-stone-800/60 hover:bg-stone-700 text-stone-400 font-bold text-xs rounded-xl transition">Clear</button>
+                    <button type="button" onclick="window.enterPinDigit('0')" class="py-3 bg-stone-800 hover:bg-stone-700 active:scale-95 text-white font-black text-lg rounded-xl transition">0</button>
+                    <button type="submit" class="py-3 bg-brand-500 hover:bg-brand-400 active:scale-95 text-stone-950 font-black text-sm rounded-xl transition shadow-md">OK</button>
+                </div>
+
+                <div class="pt-3 text-[11px] text-stone-500">
+                    Default Staff PIN: <strong class="text-stone-300 font-mono">3920</strong>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Store Settings Modal -->
+    <div id="storeSettingsModal" class="fixed inset-0 bg-stone-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-stone-900 rounded-3xl max-w-md w-full shadow-2xl border border-stone-700 p-6 text-xs text-stone-200">
+            <div class="flex items-center justify-between pb-3 border-b border-stone-800 mb-4">
+                <h3 class="text-base font-black text-white font-display">Manager & Store Settings</h3>
+                <button onclick="window.closeSettingsModal()" class="w-8 h-8 rounded-full bg-stone-800 hover:bg-stone-700 flex items-center justify-center text-stone-400">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <form onsubmit="window.saveStoreSettings(event)" class="space-y-4">
+                <div>
+                    <label class="block font-bold text-stone-300 mb-1">WhatsApp Order Number</label>
+                    <input type="text" id="settingWhatsappPhone" placeholder="+232 80 600 700" class="w-full px-3.5 py-2.5 bg-stone-800 border border-stone-700 rounded-xl text-white text-xs font-mono focus:ring-2 focus:ring-brand-500">
+                    <p class="text-[10px] text-stone-500 mt-1">Direct orders from the website will be sent to this WhatsApp number.</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-stone-300 mb-1">Orange Money Merchant ID</label>
+                        <input type="text" id="settingOrangeMerchant" placeholder="3920" class="w-full px-3.5 py-2.5 bg-stone-800 border border-stone-700 rounded-xl text-white text-xs font-mono focus:ring-2 focus:ring-brand-500">
+                        <p class="text-[9px] text-stone-500 mt-0.5">Code for *144*3*CODE*AMT#</p>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-stone-300 mb-1">Africell Merchant ID</label>
+                        <input type="text" id="settingAfricellMerchant" placeholder="3920" class="w-full px-3.5 py-2.5 bg-stone-800 border border-stone-700 rounded-xl text-white text-xs font-mono focus:ring-2 focus:ring-brand-500">
+                        <p class="text-[9px] text-stone-500 mt-0.5">Code for *161*2*CODE*AMT#</p>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-stone-300 mb-1">Staff Portal PIN Code (4 Digits)</label>
+                    <input type="text" id="settingStaffPin" maxlength="6" placeholder="3920" class="w-full px-3.5 py-2.5 bg-stone-800 border border-stone-700 rounded-xl text-white text-xs font-mono focus:ring-2 focus:ring-brand-500">
+                    <p class="text-[10px] text-stone-500 mt-1">Default PIN is 3920. Change this to secure staff access.</p>
+                </div>
+
+                <div class="pt-3 border-t border-stone-800 flex justify-end space-x-2">
+                    <button type="button" onclick="window.closeSettingsModal()" class="px-4 py-2 bg-stone-800 hover:bg-stone-700 rounded-xl font-bold text-stone-300">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-5 py-2 bg-brand-500 hover:bg-brand-400 text-stone-950 font-extrabold rounded-xl shadow-md transition">
+                        Save Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Logic (CORS-Safe Bundle) -->
+    <script src="js/bundle-admin.js"></script>
+</body>
+</html>

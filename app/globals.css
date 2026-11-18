@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════════
+   Chicken Town SL — Design System CSS Variables
+   Brand: Red #C62828 | Gold #FBC02D | Charcoal #121212
+   Tagline: SWIT U MOT SWIT U LYF
+   ═══════════════════════════════════════════════════════════ */
+
+@layer base {
+  :root {
+    /* Shadcn / Radix semantic tokens (light mode → maps to brand) */
+    --background:   0 0% 98%;       /* #FAFAFA off-white */
+    --foreground:   0 0% 7%;        /* #121212 charcoal  */
+
+    --card:         0 0% 100%;
+    --card-foreground: 0 0% 7%;
+
+    --popover:      0 0% 100%;
+    --popover-foreground: 0 0% 7%;
+
+    /* Primary = brand red */
+    --primary:          0 68% 46%;  /* #C62828 */
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary = brand gold */
+    --secondary:        43 97% 58%; /* #FBC02D */
+    --secondary-foreground: 0 0% 7%;
+
+    --muted:        0 0% 94%;
+    --muted-foreground: 0 0% 40%;
+
+    --accent:       43 97% 58%;     /* gold accent */
+    --accent-foreground: 0 0% 7%;
+
+    --destructive:  0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border:       0 0% 89%;
+    --input:        0 0% 89%;
+    --ring:         0 68% 46%;      /* red ring */
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background:   0 0% 7%;
+    --foreground:   0 0% 98%;
+
+    --card:         0 0% 10%;
+    --card-foreground: 0 0% 98%;
+
+    --popover:      0 0% 10%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary:          0 68% 46%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary:        43 97% 58%;
+    --secondary-foreground: 0 0% 7%;
+
+    --muted:        0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+
+    --accent:       43 97% 58%;
+    --accent-foreground: 0 0% 7%;
+
+    --destructive:  0 62% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border:       0 0% 20%;
+    --input:        0 0% 20%;
+    --ring:         0 68% 46%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+  }
+}
+
+/* ── Brand utility classes ───────────────────────────────── */
+@layer components {
+  .btn-brand-red {
+    @apply bg-brand-red text-white hover:bg-red-800 active:bg-red-900
+           font-semibold rounded-lg px-6 py-3 transition-colors duration-200;
+  }
+
+  .btn-brand-gold {
+    @apply bg-brand-gold text-charcoal hover:bg-yellow-400 active:bg-yellow-500
+           font-semibold rounded-lg px-6 py-3 transition-colors duration-200;
+  }
+
+  .menu-card {
+    @apply bg-white rounded-2xl shadow-sm border border-border
+           hover:shadow-md transition-shadow duration-200 overflow-hidden;
+  }
+
+  .menu-card-price {
+    @apply text-brand-red font-bold text-lg;
+  }
+
+  .section-header {
+    @apply text-2xl font-extrabold text-charcoal border-l-4 border-brand-red pl-3;
+  }
+
+  .tagline {
+    @apply text-brand-gold font-extrabold tracking-widest uppercase;
+  }
+
+  .status-badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+}
+
+/* ── Scrollbar ───────────────────────────────────────────── */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
