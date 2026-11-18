@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     // 1. Signature Verification (if app secret is configured)
     if (appSecret) {
-      const isValid = verifyWebhookSignature(rawBody, signatureHeader, appSecret)
+      const isValid = await verifyWebhookSignature(rawBody, signatureHeader, appSecret)
       if (!isValid) {
         console.error('[WhatsApp Webhook] Invalid signature. Rejected request.')
         return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
