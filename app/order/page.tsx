@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import OrderClient from './order-client'
 
 export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Order Online | Chicken Town SL',

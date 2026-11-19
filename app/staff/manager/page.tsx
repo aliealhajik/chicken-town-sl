@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import ManagerClient from './manager-client'
 
 export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Branch Manager Dashboard | Chicken Town SL',

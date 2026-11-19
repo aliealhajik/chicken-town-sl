@@ -4,6 +4,7 @@ import type { Order } from '@/types/database.types'
 import Link from 'next/link'
 
 export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
 
 interface OrderPageProps {
   params: Promise<{ id: string }>
